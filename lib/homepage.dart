@@ -1,9 +1,11 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'package:contacts/DataBase/HiveDataBase.dart';
 import 'package:contacts/UIHelper/CustomWidgets.dart';
 
 import 'package:contacts/services/contactDetail.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -18,71 +20,91 @@ class _HomepageState extends State<Homepage> {
   TextEditingController editNameController = TextEditingController();
   TextEditingController editPhoneController = TextEditingController();
 
-  List<Map<String, String>> contactsInfo = [
-    {'name': "Aman", 'phone': "6395429223"},
-    {'name': "Saurabh", 'phone': "6395429223"},
-  ];
+  final db = contactDataBase();
+  bool isLoading = true;
+
+  void InitializeApp() async {
+    await db.InitializeBox();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    InitializeApp();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Contacts")),
-      body: ListView.builder(
-        itemCount: contactsInfo.length,
-        padding: EdgeInsets.all(10),
-        shrinkWrap: true,
-        itemBuilder: (context, index) => Card(
-          elevation: 2,
-          shadowColor: Colors.black,
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: ListTile(
-            leading: Icon(Icons.person),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ContactDetail(
-                    name: contactsInfo[index]['name']!,
-                    phone: contactsInfo[index]['phone']!,
-                  ),
-                ),
-              );
-            },
-            onLongPress: () {
-              Customwidgets.showCustomDialog(
-                context,
-                "",
-                () {
-                  //onpressing Edit
-                  Navigator.pop(context);
-                  setState(() {
-                    onEditContactPressed(
-                      index,
-                      contactsInfo[index]['name']!,
-                      contactsInfo[index]['phone']!,
+      appBar: AppBar(
+        title: Text(
+          "Contacts",
 
-                      context,
-                    );
-                  });
-                },
-                // onPressing Delete
-                () {
-                  Navigator.pop(context);
-                  setState(() {
-                    contactsInfo.removeAt(index);
-                  });
-                },
-              );
-            },
-
-            title: Text(contactsInfo[index]['name']!),
-            subtitle: Text(contactsInfo[index]['phone']!),
-          ),
+          style: GoogleFonts.yaldevi(fontSize: 30, fontWeight: FontWeight.bold),
         ),
+        centerTitle: true,
       ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: db.contactList.length,
+              padding: EdgeInsets.all(10),
+              shrinkWrap: true,
+              itemBuilder: (context, index) => Card(
+                elevation: 2,
+                shadowColor: Colors.black,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.person),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ContactDetail(
+                          name: db.contactList[index]['name']!,
+                          phone: db.contactList[index]['phone']!,
+                        ),
+                      ),
+                    );
+                  },
+                  onLongPress: () {
+                    Customwidgets.showCustomDialog(
+                      context,
+                      "",
+                      () {
+                        //onpressing Edit
+                        Navigator.pop(context);
+                        setState(() {
+                          onEditContactPressed(
+                            index,
+                            db.contactList[index]['name']!,
+                            db.contactList[index]['phone']!,
+
+                            context,
+                          );
+                        });
+                      },
+                      // onPressing Delete
+                      () {
+                        Navigator.pop(context);
+                        setState(() {
+                          db.deleteContact(index);
+                        });
+                      },
+                    );
+                  },
+
+                  title: Text(db.contactList[index]['name']!),
+                  subtitle: Text(db.contactList[index]['phone']!),
+                ),
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           onFlotingActionButtonPressed(
@@ -93,9 +115,6 @@ class _HomepageState extends State<Homepage> {
         },
         child: Icon(Icons.add, size: 40),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-
-      drawer: Drawer(semanticLabel: "HELP"),
     );
   }
 
@@ -145,7 +164,7 @@ class _HomepageState extends State<Homepage> {
           TextButton(
             onPressed: () {
               setState(() {
-                contactsInfo.add({
+                db.addContact({
                   'name': nameController.text,
                   'phone': phoneController.text,
                 });
@@ -202,17 +221,22 @@ class _HomepageState extends State<Homepage> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () {}, child: Text("Cancel")),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("Cancel"),
+          ),
 
           TextButton(
             onPressed: () {
               setState(() {
-                contactsInfo[index] = {
+                db.updateContact(index, {
                   'name': EditnameController.text,
                   'phone': EditphoneController.text,
-                };
-                Navigator.pop(context);
+                });
               });
+              Navigator.pop(context);
             },
             child: Text("Save Changes"),
           ),
@@ -228,33 +252,3 @@ class _HomepageState extends State<Homepage> {
     super.dispose();
   }
 }
-
-
-//  contactsInfo.insert(index, {
-//                     'name': EditnameController.text,
-//                     'phone': EditphoneController.text,
-//                   });
-
-//contactsInfo.insert(index, {'name': '', 'phone': ''});
-
-
-
-  // bool _validatePhoneNumber(String phoneNumber) {
-  //   // E.164 format: + followed by country code and number
-  //   final regex = RegExp(r'^\+[1-9]\d{1,14}$');
-
-  //   if (phoneNumber.isEmpty) {
-  //     Uihelper.customShowDialog(context, "Please enter a phone number");
-  //     return false;
-  //   }
-
-  //   if (!regex.hasMatch(phoneNumber)) {
-  //     Uihelper.customShowDialog(
-  //       context,
-  //       "Please enter a valid phone number with country code\nExample: +919876543210",
-  //     );
-  //     return false;
-  //   }
-
-  //   return true;
-  // }
