@@ -7,8 +7,7 @@ class contactDataBase {
   void initialContactList() {
     // Only initialize if not already done
     contactList = [
-      {"name": "Aman", "phone": "6395429223"},
-      {"name": "Saurabh", "phone": "6395429223"},
+      {"name": "Sample", "phone": "1234567890"},
     ];
 
     print("Default contacts initialized for the first time");
@@ -21,8 +20,6 @@ class contactDataBase {
         data.map((item) => Map<String, dynamic>.from(item)),
       );
     }
-
-    print("Data loaded from Hive: $contactList");
   }
 
   Future<void> InitializeBox() async {
@@ -63,8 +60,7 @@ class contactDataBase {
     updateContactList();
   }
 
-
-  // when edit is used 
+  // when edit is used
   // Update contact and save to Hive
   void updateContact(int index, Map<String, dynamic> contact) {
     contactList[index] = contact;

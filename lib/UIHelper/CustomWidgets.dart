@@ -2,19 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-// class Customwidgets extends StatelessWidget {
-//   BuildContext context;
-//   String message;
-//   VoidCallback Edit;
-//   VoidCallback Delete;
-//   const Customwidgets({super.key , required this.context, required this.message, required this.Edit, required this.Delete});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ;
-//   }
-// }
-
 class Customwidgets {
   static showCustomDialog(
     BuildContext context,

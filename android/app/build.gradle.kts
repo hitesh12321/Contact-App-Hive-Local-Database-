@@ -50,3 +50,21 @@ android {
 flutter {
     source = "../.."
 }
+
+// ... your existing code ...
+
+flutter {
+    source = "../.."
+}
+
+// ========== ADD THIS DEPENDENCIES SECTION ==========
+dependencies {
+    // Add Play Core dependency for Flutter deferred components
+    implementation("com.google.android.play:core:1.10.3")
+    
+    // Optional: Kotlin extensions for Play Core
+    implementation("com.google.android.play:core-ktx:1.8.1")
+    
+    // Add these if you're using other Google services
+    implementation("com.google.android.gms:play-services-base:18.2.0")
+}
